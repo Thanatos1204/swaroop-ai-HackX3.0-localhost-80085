@@ -57,7 +57,6 @@ interface FormNavbarProps {
 
 const FormNavbar = ({ activeForm, setActiveForm }: FormNavbarProps) => {
   const formOptions = [
-    { id: 'photo-height', label: 'Photo & Height' },
     { id: 'height-only', label: 'Height Only' },
     { id: 'height-weight', label: 'Height & Weight' },
     { id: 'live-cam', label: 'Live Camera' }
@@ -146,7 +145,7 @@ export default function LandingPage() {
   // Add these states at the top of your component
   const [isLoading, setIsLoading] = useState(false);
   const [sizeRecommendation, setSizeRecommendation] = useState<{ recommended_size: string; } | null>(null);
-  const [activeForm, setActiveForm] = useState('photo-height');
+  const [activeForm, setActiveForm] = useState('height-only');
   const [height, setHeight] = useState(0);
   const [weight, setWeight] = useState(0);
   const [gender, setGender] = useState('');
