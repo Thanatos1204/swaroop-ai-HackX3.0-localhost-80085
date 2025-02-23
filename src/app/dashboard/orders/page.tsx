@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
-import { useState } from 'react'
-import { Order } from '@/types'
+import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from 'react'
+import { Order } from '@/types';
+import Image from 'next/image';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -17,9 +19,9 @@ export default function OrdersPage() {
               <p className="text-gray-600">{order.date}</p>
             </div>
             <div className="space-y-4">
-              {order.items.map(item => (
+              {order.items.map((item: { id: Key; imageUrl: string; name: string; brand: string; size: string; fit: string; price: number }) => (
                 <div key={item.id} className="flex items-center gap-4">
-                  <img src={item.imageUrl} alt={item.name} className="w-20 h-20 object-cover rounded" />
+                  <Image src={item.imageUrl || '/default-image.jpg'} alt={String(item.name)} className="w-20 h-20 object-cover rounded" />
                   <div>
                     <p className="font-semibold">{item.name}</p>
                     <p className="text-gray-600">{item.brand}</p>

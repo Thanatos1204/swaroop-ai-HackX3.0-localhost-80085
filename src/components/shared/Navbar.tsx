@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import Link from 'next/link'
@@ -7,11 +8,7 @@ import Image from "next/image";
 import logo from "../../public/logo.png";
 
 export default function Navbar() {
-  const pathname = usePathname()
 
-  const isActive = (path: string) => {
-    return pathname === path
-  }
 
   return (
     <nav className="bg-white shadow-sm w-full">

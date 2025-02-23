@@ -1,16 +1,22 @@
 // src/app/page.tsx
 'use client';
-
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { WavyBackground } from "@/components/ui/wavy-background";
 import { useState } from 'react';
-import { Camera, Upload, Ruler, ShirtIcon, CheckCircle, Store, History, ArrowRight, Sparkles } from 'lucide-react';
-import Link from 'next/link';
+import { Camera, Ruler, ShirtIcon, Store, History, ArrowRight } from 'lucide-react';
 import { Timeline } from "@/components/ui/timeline";
 import axios from 'axios';
 
 // Form Components
-const FormInput = ({ label, type, value, onChange, placeholder }: any) => (
+interface FormInputProps {
+  label: string;
+  type: string;
+  value: string | number;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder: string;
+}
+
+const FormInput = ({ label, type, value, onChange, placeholder }: FormInputProps) => (
   <motion.div variants={fadeInUp} className="mb-6">
     <label className="block text-sm font-medium text-gray-700 mb-2">
       {label}
@@ -25,7 +31,7 @@ const FormInput = ({ label, type, value, onChange, placeholder }: any) => (
   </motion.div>
 );
 
-const GenderSelect = ({ value, onChange }: any) => (
+const GenderSelect = ({ value, onChange }: { value: string; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
   <motion.div variants={fadeInUp} className="mb-6">
     <label className="block text-sm font-medium text-gray-700 mb-2">
       Gender
@@ -44,7 +50,12 @@ const GenderSelect = ({ value, onChange }: any) => (
 );
 
 // Form Navigation
-const FormNavbar = ({ activeForm, setActiveForm }: any) => {
+interface FormNavbarProps {
+  activeForm: string;
+  setActiveForm: (form: string) => void;
+}
+
+const FormNavbar = ({ activeForm, setActiveForm }: FormNavbarProps) => {
   const formOptions = [
     { id: 'photo-height', label: 'Photo & Height' },
     { id: 'height-only', label: 'Height Only' },
@@ -135,13 +146,11 @@ export default function LandingPage() {
   // Add these states at the top of your component
   const [isLoading, setIsLoading] = useState(false);
   const [sizeRecommendation, setSizeRecommendation] = useState<{ recommended_size: string; } | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [activeForm, setActiveForm] = useState('photo-height');
   const [height, setHeight] = useState(0);
   const [weight, setWeight] = useState(0);
   const [gender, setGender] = useState('');
   const [age, setAge] = useState('');
-  const [files, setFiles] = useState<{ front?: File; side?: File }>({});
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const timelineData = [
     {
@@ -240,35 +249,13 @@ export default function LandingPage() {
   const handleAPICall = async (event: React.MouseEvent) => {
     event.preventDefault();
     setIsLoading(true);
-    setError(null);
-
     try {
       switch (activeForm) {
-        case 'photo-height':
-          // Photo & Height Form
-          if (!height || !files.front || !files.side) {
-            setError('Please provide height and both photos');
-            return;
-          }
-          const formData = new FormData();
-          formData.append('height', height.toString());
-          formData.append('front_image', files.front);
-          formData.append('side_image', files.side);
-
-          const photoResponse = await axios.post(
-            'https://your-ngrok-url/photo-height-prediction',
-            formData,
-            {
-              headers: { 'Content-Type': 'multipart/form-data' }
-            }
-          );
-          setSizeRecommendation(photoResponse.data);
-          break;
 
         case 'height-only':
           // Height & Gender Only Form
           if (!height || !gender) {
-            setError('Please provide height and gender');
+            alert('Please provide height and gender');
             return;
           }
           const heightResponse = await axios.post(
@@ -285,7 +272,7 @@ export default function LandingPage() {
         case 'height-weight':
           // Height, Weight, Gender & Age Form
           if (!height || !weight || !gender || !age) {
-            setError('Please fill all fields');
+            alert('Please fill all fields');
             return;
           }
           const fullResponse = await axios.post(
@@ -322,65 +309,14 @@ export default function LandingPage() {
       }
     } catch (error) {
       console.error('Error:', error);
-      setError('Failed to get size recommendation. Please try again.');
     } finally {
-      setIsLoading(false);
+      alert('Failed to get size recommendation. Please try again.');
     }
   };
   // Form renderer based on active form
   const renderForm = () => {
     switch (activeForm) {
-      case 'photo-height':
-        return (
-          <>
-            <FormInput
-              label="Height (cm)"
-              type="number"
-              value={height}
-              onChange={(e: any) => setHeight(e.target.value)}
-              placeholder="Enter your height"
-            />
-            <motion.div variants={fadeInUp} className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Upload Photos
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                {['front', 'side'].map((view) => (
-                  <motion.div
-                    key={view}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="relative"
-                  >
-                    <div className="h-40 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-all duration-300 hover:border-blue-500">
-                      <div className="text-center">
-                        <motion.div
-                          animate={{ rotate: [0, 360] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        >
-                          <Camera className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                        </motion.div>
-                        <span className="text-sm text-gray-500">
-                          {view === 'front' ? 'Front View' : 'Side View'}
-                        </span>
-                      </div>
-                      <input
-                        type="file"
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) {
-                            setFiles(prev => ({ ...prev, [view]: e.target.files![0] }));
-                          }
-                        }}
-                        accept="image/*"
-                      />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        );
+
 
       case 'height-only':
         return (
@@ -389,12 +325,12 @@ export default function LandingPage() {
               label="Height (cm)"
               type="number"
               value={height}
-              onChange={(e: any) => setHeight(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setHeight(Number(e.target.value))}
               placeholder="Enter your height"
             />
             <GenderSelect
               value={gender}
-              onChange={(e: any) => setGender(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setGender(e.target.value)}
             />
           </>
         );
@@ -406,25 +342,25 @@ export default function LandingPage() {
               label="Height (cm)"
               type="number"
               value={height}
-              onChange={(e: any) => setHeight(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setHeight(Number(e.target.value))}
               placeholder="Enter your height"
             />
             <FormInput
               label="Weight (kg)"
               type="number"
               value={weight}
-              onChange={(e: any) => setWeight(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWeight(Number(e.target.value))}
               placeholder="Enter your weight"
             />
             <GenderSelect
               value={gender}
-              onChange={(e: any) => setGender(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setGender(e.target.value)}
             />
             <FormInput
               label="Age"
               type="number"
               value={age}
-              onChange={(e: any) => setAge(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAge(e.target.value)}
               placeholder="Enter your age"
             />
           </>
@@ -449,23 +385,6 @@ export default function LandingPage() {
         return null;
     }
   };
-
-  function handleGetRecommendation(event: any): void {
-    event.preventDefault();
-    if (!weight) {
-      axios.post('https://ac31-114-79-154-194.ngrok-free.app/get-size-height-gender', {
-        height: height,
-        gender: 'male',
-      }).then((response) => {
-        console.log(response.data);
-        alert(response.data);
-      }).catch((error) => {
-        console.error('Error:', error);
-      });
-    }
-
-    throw new Error('Function not implemented.');
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col">

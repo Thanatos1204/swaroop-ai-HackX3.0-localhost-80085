@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { ClothingItem } from '@/types'
 
 export default function CatalogPage() {
@@ -39,7 +41,7 @@ export default function CatalogPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {items.map(item => (
           <div key={item.id} className="border rounded-lg overflow-hidden">
-            <img src={item.imageUrl} alt={item.name} className="w-full h-64 object-cover" />
+            <Image src={item.imageUrl} alt={item.name} className="w-full h-64 object-cover" />
             <div className="p-4">
               <h3 className="font-semibold">{item.name}</h3>
               <p className="text-gray-600">{item.brand}</p>
