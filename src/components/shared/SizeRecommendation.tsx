@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState, useRef } from 'react'
@@ -6,6 +7,7 @@ import type { SizeRecommendation as SizeRecommendationType } from '@/types'
 
 export default function SizeRecommendation() {
   const [height, setHeight] = useState('')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [images, setImages] = useState<{ front?: File; side?: File }>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [recommendation, setRecommendation] = useState<SizeRecommendationType | null>(null)

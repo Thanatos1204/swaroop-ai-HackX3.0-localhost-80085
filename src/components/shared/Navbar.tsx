@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import logo from "../../public/logo.png";
