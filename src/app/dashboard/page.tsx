@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/app/page.tsx
 'use client';
 import { motion } from 'framer-motion';
@@ -146,7 +147,22 @@ export default function LandingPage() {
   // States
   // Add these states at the top of your component
   const [isLoading, setIsLoading] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<File | null>(null)
   const [sizeRecommendation, setSizeRecommendation] = useState<{ recommended_size: string; } | null>(null);
+  const [res, setRes] = useState<{
+    ankle: number | null;
+    "arm length": number;
+    belly: number;
+    chest: number;
+    height: number;
+    hips: number;
+    neck: number;
+    "shoulder width": number;
+    thigh: number;
+    waist: number;
+    wrist: number;
+    model_url: string;
+  } | null>(null);
   const [activeForm, setActiveForm] = useState('height-only');
   const [height, setHeight] = useState(0);
   const [weight, setWeight] = useState(0);
@@ -250,6 +266,48 @@ export default function LandingPage() {
       distance: "2.0 km"
     }
   ];
+
+  const downloadModel = async () => {
+    try {
+      const response = await axios.get(
+        "https://19ab-34-168-79-115.ngrok-free.app/download_model?filename=test.obj",
+        {
+          responseType: "blob", // Ensures the response is treated as a file
+        }
+
+      );
+  
+      // Create a blob URL for the downloaded file
+      const blob = new Blob([response.data], { type: "application/octet-stream" });
+      const url = window.URL.createObjectURL(blob);
+  
+      // Create a temporary link element to trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "test.obj"); // Set the filename
+      document.body.appendChild(link);
+      link.click();
+  
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+     // Store the Blob in Local Storage (convert Blob to Base64)
+    const reader = new FileReader();
+    reader.readAsDataURL(response.data);
+    reader.onloadend = () => {
+      localStorage.setItem("modelBlob", reader.result as string);
+    };
+
+    console.log("Model downloaded and stored successfully!");
+  } catch (error) {
+    console.error("Error downloading the model:", error);
+  }
+};
+  const handleImageCapture = (image: File) => {
+    setCapturedImage(image);
+  };
+
   const handleAPICall = async (event: React.MouseEvent) => {
     event.preventDefault();
     setIsLoading(true);
@@ -292,31 +350,50 @@ export default function LandingPage() {
           console.log(fullResponse.data);
           break;
 
-        case 'live-cam':
-          // Live Camera Form
-          // if (!files.webcam) {
-          //   setError('Please capture an image first');
-          //   return;
-          // }
-          // const webcamData = new FormData();
-          // webcamData.append('image', files.webcam);
-
-          const webcamResponse = await axios.post(
-            'https://7bab-136-232-244-238.ngrok-free.app/video_feed',
-            // webcamData,
-            {
-              headers: { 'Content-Type': 'multipart/form-data' }
+          case 'live-cam':
+            if (!capturedImage) {
+              alert('Please capture an image first!');
+              return;
             }
-          );
-          setSizeRecommendation(webcamResponse.data);
-          break;
+  
+            const formData = new FormData();
+            formData.append('image', capturedImage);
+            formData.append('height','167');
+  
+            const response = await axios.post(
+              `https://19ab-34-168-79-115.ngrok-free.app/process_image`,
+              formData,
+              {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                  'User-Agent': 'PostmanRuntime/7.43.0',
+                  'Accept': '*/*',
+                  'Accept-Encoding': 'gzip, deflate, br',
+                  'Connection': 'keep-alive',
+                }
+              }
+            );
+            
+  
+            setRes(response.data);
+            console.log('API Response:', response.data);
+            await downloadModel()
+            break;
+  
+          default:
+            alert('Invalid form selected');
+
       }
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      alert('Failed to get size recommendation. Please try again.');
+     } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to get size recommendation. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+      
+          
     }
-  };
+    
   // Form renderer based on active form
   const renderForm = () => {
     switch (activeForm) {
@@ -371,7 +448,7 @@ export default function LandingPage() {
         );
 
       case 'live-cam':
-        return <WebcamDashboard />;
+        return <WebcamDashboard onImageCapture={handleImageCapture} />;
 
       default:
         return null;
