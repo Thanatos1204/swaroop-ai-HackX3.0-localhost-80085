@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Camera, Ruler, ShirtIcon, Store, History, ArrowRight } from 'lucide-react';
 import { Timeline } from "@/components/ui/timeline";
 import axios from 'axios';
+import WebcamDashboard from '@/components/WebCamDashboard';
 
 // Form Components
 interface FormInputProps {
@@ -123,6 +124,7 @@ interface Feature {
   description: string;
   icon: React.ReactNode;
   buttonText: string;
+  buttonAction: string;
   buttonIcon?: React.ReactNode;
   gradient: string;
 }
@@ -192,6 +194,7 @@ export default function LandingPage() {
       description: "Upload your photos or enter your measurements for perfect size recommendations",
       icon: <Ruler className="w-6 h-6 text-white" />,
       buttonText: "Get Your Size",
+      buttonAction: 'height-weight',
       buttonIcon: <Ruler className="w-4 h-4 mr-2" />,
       gradient: "from-blue-400 to-blue-600"
     },
@@ -200,6 +203,7 @@ export default function LandingPage() {
       description: "See how clothes will look on you before making a purchase",
       icon: <ShirtIcon className="w-6 h-6 text-white" />,
       buttonText: "Try Now",
+      buttonAction: 'live-cam',
       buttonIcon: <Camera className="w-4 h-4 mr-2" />,
       gradient: "from-purple-400 to-purple-600"
     },
@@ -208,6 +212,7 @@ export default function LandingPage() {
       description: "Get recommendations from your favorite brands in your perfect size",
       icon: <Store className="w-6 h-6 text-white" />,
       buttonText: "Find Brands",
+      buttonAction: '',
       buttonIcon: <Store className="w-4 h-4 mr-2" />,
       gradient: "from-indigo-400 to-indigo-600"
     }
@@ -297,7 +302,7 @@ export default function LandingPage() {
           // webcamData.append('image', files.webcam);
 
           const webcamResponse = await axios.post(
-            'https://your-ngrok-url/webcam-prediction',
+            'https://7bab-136-232-244-238.ngrok-free.app/video_feed',
             // webcamData,
             {
               headers: { 'Content-Type': 'multipart/form-data' }
@@ -366,19 +371,7 @@ export default function LandingPage() {
         );
 
       case 'live-cam':
-        return (
-          <div className="h-64 bg-gray-100 rounded-lg flex flex-col items-center justify-center">
-            <Camera className="w-16 h-16 text-gray-400 mb-4" />
-            <p className="text-gray-500">Camera Preview</p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg"
-            >
-              Start Camera
-            </motion.button>
-          </div>
-        );
+        return <WebcamDashboard />;
 
       default:
         return null;
@@ -520,6 +513,7 @@ export default function LandingPage() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 group"
+                    onClick={()=> {setActiveForm(feature.buttonAction); document.body.scrollTop = 10; document.documentElement.scrollTop = 10;}}
                   >
                     <span className="flex items-center">
                       {feature.buttonIcon}
