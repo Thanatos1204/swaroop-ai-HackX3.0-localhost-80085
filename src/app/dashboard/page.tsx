@@ -146,7 +146,8 @@ export default function LandingPage() {
   // States
   // Add these states at the top of your component
   const [isLoading, setIsLoading] = useState(false);
-  const [sizeRecommendation, setSizeRecommendation] = useState<{ recommended_size: string; } | null>(null);
+  const [sizeRecommendation, setSizeRecommendation] = useState<{ age:number;gender:string;recommended_size: string; recommended_fit : string;height:number;weight:number; } | null>(null);
+ 
   const [activeForm, setActiveForm] = useState('height-only');
   const [height, setHeight] = useState(0);
   const [weight, setWeight] = useState(0);
@@ -289,6 +290,7 @@ export default function LandingPage() {
             }
           );
           setSizeRecommendation(fullResponse.data);
+          
           console.log(fullResponse.data);
           break;
 
@@ -442,7 +444,7 @@ export default function LandingPage() {
                     animate={pulseAnimation}
                   >
                     <span className="text-gray-600">Fit:</span>
-                    <span className="font-medium">Loading...</span>
+                    <span className="font-medium">{isLoading ? 'Loading...' : sizeRecommendation?.recommended_fit}</span>
                   </motion.div>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
